@@ -1,0 +1,11 @@
+async-generator==1.10
+async-timeout==3.0.1
+discord.py==2.2.3
+requests==2.25.1
+google-api-core==1.26.1
+google-api-python-client==2.3.0
+google-auth-httplib2==0.1.0
+google-auth-oauthlib==0.4.4
+python-dotenv==0.16.0
+pymongo==4.3.3
+psycopg2==2.9.6

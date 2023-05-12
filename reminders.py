@@ -2,6 +2,9 @@ from typing import List
 import discord
 from discord.ext import commands
 from datetime import datetime, timedelta
+from pymongo import MongoClient
+from pymongo.cursor import Cursor
+from pymongo.database import Database as MongoDatabase
 import sqlite3
 import re
 import calendar
@@ -11,42 +14,10 @@ class Database:
     "This class contains all the methods that involve interacting and working with the database. The bot commands simply call these methods to perform operations on the database."
 
     @staticmethod
-    def create_connection(db_file=r"database\reminders.db") -> sqlite3.Connection:
-        "Create a database connection to a SQLite database. Returns an sqlite3.Connection object."
-        conn = None
-        try:
-            conn = sqlite3.connect(
-                db_file, detect_types=sqlite3.PARSE_DECLTYPES | sqlite3.PARSE_COLNAMES
-            )
-            Database.create_required_tables(conn)
-        except sqlite3.Error as e:
-            print(e)
-        finally:
-            if conn:
-                return conn
-
-    @staticmethod
-    def create_required_tables(conn: sqlite3.Connection) -> None:
-        """
-        Creates a table called 'reminders' in the database. Takes in a 'sqlite.Connection' object and executes the SQL code to create the necessary tables.
-        This function is automatically called as soon as a connection is created, in the Database.create_connection() function.
-        """
-        try:
-            c = conn.cursor()
-
-            sql_code = """CREATE TABLE IF NOT EXISTS reminders (
-                id integer PRIMARY KEY,
-                user text NOT NULL,
-                user_id integer NOT NULL,
-                reminder text NOT NULL,
-                time timestamp NOT NULL
-                );"""
-
-            c.execute(sql_code)
-            conn.commit()
-
-        except sqlite3.Error as e:
-            print(e)
+    def create_connection() -> MongoDatabase:
+        client = MongoClient(host="localhost", port=27017)
+        bot_db = client.snuggly
+        return bot_db
 
     @staticmethod
     def check_reminders(user_id: int) -> List:
@@ -54,38 +25,20 @@ class Database:
         Retrieves the 'reminders' from the database which belong to the given user and returns them as a List object.
         param <user_id>: An integer that contains the user's ID, which is like a very long number.
         """
-        try:
-            conn = Database.create_connection()
-
-            c = conn.cursor()
-            sql_code = f"""SELECT * FROM reminders WHERE user_id=?"""
-            c.execute(sql_code, (user_id,))
-
-            rows = c.fetchall()
-            return rows
-
-        except sqlite3.Error as e:
-            print(e)
-
-    @staticmethod
-    def get_all_reminders() -> List:
-        "Retrieves all 'reminders' from the database and returns them as a List object."
-        try:
-            conn = Database.create_connection()
-
-            c = conn.cursor()
-            sql_code = f"""SELECT * FROM reminders"""
-            c.execute(sql_code)
-
-            rows = c.fetchall()
-            return rows
-
-        except sqlite3.Error as e:
-            print(e)
+        db = Database.create_connection()
+        reminders_col = db.reminders
+        c = reminders_col.find({"user_id": int(user_id)})
+        return c
 
     @staticmethod
     def listen_for_due_reminders():
-        "An asynchronous function that will check all reminders in the database for when one of them is due, and then alert the user. THIS FUNCTION IS INCOMPLETE AS OF YET!"
+        """
+        An asynchronous function that will check all reminders in the database for when one of them is due, 
+        and then alert the user.
+        
+        THIS FUNCTION IS INCOMPLETE AS OF YET!
+        """
+        # TODO: Finish this.
         rows = Database.get_all_reminders()
         for row in rows:
             user = row[1]
@@ -102,22 +55,17 @@ class Database:
         param <reminder>: A string that contains the reminder text, exactly as is stored in the database.
         param <time>: A string that contains the time until we remind the user, for example '2d5h16m' is 2 days, 5 hours, and 16 minutes.
         """
-        try:
-            conn = Database.create_connection()
-            c = conn.cursor()
-            sql_code = (
-                f"""INSERT INTO reminders(user,user_id,reminder,time) VALUES(?,?,?,?)"""
-            )
-            values = (user, user_id, reminder, time)
+        db = Database.create_connection()
+        reminders_col = db.reminders
+        result = reminders_col.insert_one({
+            "user_id": user_id,
+            "user": user,
+            "reminder": reminder,
+            "time": time
+        })
 
-            c.execute(sql_code, values)
+        return result.acknowledged
 
-            conn.commit()
-            conn.close()
-
-            return c.lastrowid
-        except sqlite3.Error as e:
-            print(e)
 
     @staticmethod
     def remove_reminder(reminder: str, user_id: int):
@@ -127,23 +75,10 @@ class Database:
         param <reminder>: A string that contains the reminder text, exactly as is stored in the database.
         param <user_id>: An integer that contains the user's ID, which is like a very long number.
         """
-        try:
-            conn = Database.create_connection()
-            c = conn.cursor()
-            sql_code = f"""DELETE FROM reminders WHERE reminder = ? AND user_id = ?"""
-
-            c.execute(
-                sql_code,
-                (
-                    reminder,
-                    user_id,
-                ),
-            )
-            conn.commit()
-            conn.close()
-
-        except sqlite3.Error as e:
-            print(e)
+        db = Database.create_connection()
+        reminders_col = db.reminders
+        result = reminders_col.delete_one({'reminder': reminder, 'user_id': user_id})
+        return result.acknowledged
 
 
 class Utilities:
@@ -151,22 +86,16 @@ class Utilities:
 
     @staticmethod
     def convert_date_to_readable_form(date):
-        date_in_readable_form = (
-            calendar.month_name[date.month] + " " + str(date.day) + " " + str(date.year)
-        )
-        time_in_readable_form = (
-            str(date.hour) + ":" + str(date.minute) + ":" + str(date.second)
-        )
+        formatted_date = datetime.strftime(date, "%d %B, %I:%M %p")
+        return formatted_date
 
-        result = str(date_in_readable_form) + " - " + str(time_in_readable_form)
-        return result
 
 class RemindersCog(commands.Cog, name="Reminders"):
     def __init__(self, bot) -> None:
         self.bot = bot
 
     @commands.command(aliases=["reminder"])
-    async def create_reminder(self, ctx, time, reminder):
+    async def create_reminder(self, ctx, time, *, reminder):
         """
         Create a new reminder.
 
@@ -225,22 +154,28 @@ class RemindersCog(commands.Cog, name="Reminders"):
         )
         await ctx.send(embed=embed)
 
+    @create_reminder.error
+    async def create_reminder_error(self, ctx, error):
+        if isinstance(error, commands.errors.MissingRequiredArgument):
+            embed = discord.Embed(title="Error", description=f"Please specify the: {error.param}", color=discord.Color.red())
+            await ctx.send(embed=embed)
+
 
     @commands.command(aliases=["reminders"])
     async def read_reminders(self, ctx):
         """
         Check all reminders you currently have.
         """
-        rows = Database.check_reminders(user_id=str(ctx.message.author.id))
+        rows = Database.check_reminders(user_id=ctx.message.author.id)
         items = []
 
         if rows:
             for row in rows:
-                date_str = Utilities.convert_date_to_readable_form(row[4])
-                items.append(f"({row[0]}) {row[3]} due at **{date_str}**")
+                date_str = Utilities.convert_date_to_readable_form(row['time'])
+                items.append(f"{row['reminder'].capitalize()} due at **{date_str}**")
             embed = discord.Embed(
                 description=f"**Reminders for {ctx.message.author.mention}**\n\n"
-                + "\n".join(items)
+                + "\n".join(items), color=discord.Color.blue()
             )
             await ctx.send(embed=embed)
         else:

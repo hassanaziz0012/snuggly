@@ -11,3 +11,4 @@ venv/*
 *~
 *.swp
 *.swo
+.vscode/settings.json

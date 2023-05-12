@@ -50,7 +50,6 @@ async def greet(ctx):
 
 async def load_extensions():
     # Loading all bot extensions...
-    await client.load_extension("wishlist")
     await client.load_extension("google_apis")
     await client.load_extension("note_taking")
     await client.load_extension("reminders")

@@ -8,11 +8,11 @@ The command prefix is a period/dot. ( . )
 Under construction. READMEs are so boring to write... :)
 
 ## Main Tasks
-- Refactor and improve existing codebase
-- Shift all data storage to MongoDB + ensure that each user's data is stored separately.
-- Use this bot project to also learn MongoDB deeply: https://roadmap.sh/mongodb
-- Implement logging for all commands and bot operations
-- Trading/Chart Analysis commands (mostly crypto stuff)
-- Music and VC features
-- AI stuff (vague ik, not sure what to add yet, but I wanna dive into AI so, yeah.)
+- [ ] Refactor and improve existing codebase
+- [x] Shift all data storage to MongoDB + ensure that each user's data is stored separately.
+- [ ] Use this bot project to also learn MongoDB deeply: https://roadmap.sh/mongodb
+- [ ] Implement logging for all commands and bot operations
+- [ ] Trading/Chart Analysis commands (mostly crypto stuff)
+- [ ] Music and VC features
+- [ ] AI stuff (vague ik, not sure what to add yet, but I wanna dive into AI so, yeah.)
 

@@ -1,11 +1,9 @@
 # Contains the commands for the note-taking features of the bot.
-import sqlite3
-from typing import List, Tuple
-import discord
 from discord.ext import commands
 from pymongo import MongoClient
 from pymongo.cursor import Cursor
 from pymongo.database import Database as MongoDatabase
+import discord
 
 
 class Database:
@@ -17,28 +15,28 @@ class Database:
     @staticmethod
     def create_connection() -> MongoDatabase:
         client = MongoClient(host="localhost", port=27017)
-        bot_db = client.hassanbot
+        bot_db = client.snuggly
         return bot_db
 
     @staticmethod
     def check_notes(user_id: int) -> Cursor:
         db = Database.create_connection()
-        notes_coll = db.notes
-        c = notes_coll.find({"user_id": user_id})
+        notes_col = db.notes
+        c = notes_col.find({"user_id": user_id})
         return c
 
     @staticmethod
     def read_note(user_id: int, title: str) -> dict:
         db = Database.create_connection()
-        notes_coll = db.notes
-        note = notes_coll.find_one({"user_id": user_id, "title": title})
+        notes_col = db.notes
+        note = notes_col.find_one({"user_id": user_id, "title": title})
         return note
 
     @staticmethod
     def add_note(user_id: int, user: str, title: str, content: str) -> bool:
         db = Database.create_connection()
-        notes_coll = db.notes
-        result = notes_coll.insert_one({
+        notes_col = db.notes
+        result = notes_col.insert_one({
             "user_id": user_id,
             "user": user,
             "title": title,
@@ -50,8 +48,8 @@ class Database:
     @staticmethod
     def remove_note(title: str, user_id: int) -> bool:
         db = Database.create_connection()
-        notes_coll = db.notes
-        result = notes_coll.delete_one({"title": title})
+        notes_col = db.notes
+        result = notes_col.delete_one({"title": title})
         return result.acknowledged
 
 

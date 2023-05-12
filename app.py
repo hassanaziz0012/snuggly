@@ -7,13 +7,17 @@ import logging
 import sys
 
 
-logger = logging.getLogger('discord')
-logger.setLevel(logging.INFO)
+discord_logger = logging.getLogger('discord')
+discord_logger.setLevel(logging.INFO)
 handler = logging.StreamHandler(sys.stdout)
 date_format = "%Y-%m-%d %H:%M:%S"
 formatter = logging.Formatter('[{asctime}] [{levelname}] {name}: {message}', date_format, style="{")
 handler.setFormatter(formatter)
-logger.addHandler(handler)
+discord_logger.addHandler(handler)
+
+snuggly_logger = logging.getLogger('snuggly')
+snuggly_logger.setLevel(logging.INFO)
+snuggly_logger.addHandler(handler)
 
 intents = discord.Intents.default()
 intents.members = True
@@ -30,7 +34,7 @@ token = os.environ.get('TOKEN')
 async def on_ready():
     # TODO: There's gotta be a better way of doing this. Find it.
     # We're basically using the on_ready event to check for due reminders.
-    print("Bot is ready")
+    snuggly_logger.info("Bot is ready")
     # print("Checking for reminders every 3 seconds...")
     # while True:
     #     due_reminders = await RemindersCog.check_for_due_reminders()

@@ -13,6 +13,11 @@ Under construction. READMEs are so boring to write... :)
 - [ ] Use this bot project to also learn MongoDB deeply: https://roadmap.sh/mongodb
 - [ ] Implement logging for all commands and bot operations
 - [ ] Trading/Chart Analysis commands (mostly crypto stuff)
+    - [ ] Get prices of a given coin.
+    - [ ] Display an image of the chart of the coin, user can select timeframe too.
+- [ ] Twitter integration
+    - [ ] Post updates from selected accounts. You can integrate this with trading features as well.
 - [ ] Music and VC features
+- [ ] Random caller feature - You "call", someone else "calls", bot puts you both on the line and you can talk to each other.
 - [ ] AI stuff (vague ik, not sure what to add yet, but I wanna dive into AI so, yeah.)
 

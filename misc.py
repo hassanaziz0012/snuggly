@@ -30,6 +30,10 @@ class MiscCog(commands.Cog, name="Misc"):
         await member.kick(reason=reason)
         await ctx.send(f"{member.mention} was kicked for the following reason:\n{reason}")
 
+    @kick.error
+    async def kick_error(self, ctx, error):
+        if isinstance(error, commands.errors.MissingRequiredArgument):
+            await ctx.send("Please mention the user you want to kick.")
 
     @commands.command(name="8ball")
     async def _8ball(self, ctx, *, question=None):

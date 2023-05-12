@@ -9,7 +9,10 @@ from pymongo.database import Database as MongoDatabase
 
 
 class Database:
-    "This class contains all the methods that involve interacting and working with the database. The bot commands simply call these methods to perform operations on the database."
+    """
+    This class contains all the methods that involve interacting and working with the database. 
+    The bot commands simply call these methods to perform operations on the database.
+    """
 
     @staticmethod
     def create_connection() -> MongoDatabase:
@@ -17,14 +20,12 @@ class Database:
         bot_db = client.hassanbot
         return bot_db
 
-
     @staticmethod
     def check_notes(user_id: int) -> Cursor:
         db = Database.create_connection()
         notes_coll = db.notes
         c = notes_coll.find({"user_id": user_id})
-        return c            
-        
+        return c
 
     @staticmethod
     def read_note(user_id: int, title: str) -> dict:
@@ -32,7 +33,6 @@ class Database:
         notes_coll = db.notes
         note = notes_coll.find_one({"user_id": user_id, "title": title})
         return note
-
 
     @staticmethod
     def add_note(user_id: int, user: str, title: str, content: str) -> bool:
@@ -54,6 +54,7 @@ class Database:
         result = notes_coll.delete_one({"title": title})
         return result.acknowledged
 
+
 class NotesCog(commands.Cog, name="Notes"):
     def __init__(self, bot) -> None:
         self.bot = bot
@@ -70,9 +71,9 @@ class NotesCog(commands.Cog, name="Notes"):
             for i, note in enumerate(c, start=1):
                 items.append(f"({i}) {note['title']}")
 
-        embed = discord.Embed(description="**YOUR NOTES:**\n\n" + "\n".join(items))
+        embed = discord.Embed(
+            description="**YOUR NOTES:**\n\n" + "\n".join(items))
         await ctx.send(embed=embed)
-
 
     @commands.command(aliases=["note"])
     async def read_note(self, ctx, title: str = None):
@@ -83,9 +84,11 @@ class NotesCog(commands.Cog, name="Notes"):
         > .read_note "Note Title"
         """
         if title is not None:
-            note = Database.read_note(user_id=int(ctx.message.author.id), title=title)
+            note = Database.read_note(user_id=int(
+                ctx.message.author.id), title=title)
             if note is not None:
-                embed = discord.Embed(description=f"**{note['title']}**\n\n{note['content']}")
+                embed = discord.Embed(
+                    description=f"**{note['title']}**\n\n{note['content']}")
                 await ctx.send(embed=embed)
             else:
                 await ctx.send(
@@ -99,7 +102,6 @@ class NotesCog(commands.Cog, name="Notes"):
                     description="You forgot to enter a title. You need to type the title of the note."
                 )
             )
-
 
     @commands.command(aliases=["writenote"])
     async def write_note(self, ctx, title: str = None, *, content: str = None):
@@ -131,7 +133,6 @@ class NotesCog(commands.Cog, name="Notes"):
                 )
             )
 
-
     @commands.command(aliases=["removenote"])
     async def remove_note(self, ctx, title=None):
         """
@@ -144,7 +145,8 @@ class NotesCog(commands.Cog, name="Notes"):
                 user_id=int(ctx.message.author.id), title=title
             )
             if selected_note is not None:
-                Database.remove_note(title=title, user_id=int(ctx.message.author.id))
+                Database.remove_note(
+                    title=title, user_id=int(ctx.message.author.id))
             else:
                 await ctx.send(
                     embed=discord.Embed(

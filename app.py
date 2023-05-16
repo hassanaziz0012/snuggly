@@ -59,6 +59,7 @@ async def load_extensions():
     await client.load_extension("reminders")
     await client.load_extension("misc")
     await client.load_extension("text_remover")
+    await client.load_extension("polling")
 
 async def main():
     async with client:

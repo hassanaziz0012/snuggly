@@ -5,14 +5,47 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from googleapiclient.http import MediaFileUpload
+from datetime import datetime, timedelta
 import socket
 import requests
+import re
+
 
 # If modifying these scopes, delete the file token.json.
 SCOPES = [
     "https://www.googleapis.com/auth/drive",
 ]
 
+
+def parse_date_string(s) -> datetime:
+    # Read the "s" argument to figure out how many days, hours, and minutes until we remind the user.
+    days, hours, minutes = None, None, None
+    if "d" in s:
+        pattern = "\d+d"
+        match = re.search(pattern, s)
+        days = str(match.group()).replace("d", "")
+    
+    if "h" in s:
+        print(s)
+        pattern = "\d+h"
+        match = re.search(pattern, s, flags=re.IGNORECASE)
+        hours = str(match.group()).replace("h", "")
+    
+    if "m" in s:
+        pattern = "\d+m"
+        match = re.search(pattern, s)
+        minutes = str(match.group()).replace("m", "")
+    
+    # There is a possibility that the user does not enter a day or an hour or a minute. We check for that possiblity here using ternary operators.
+    date = datetime.today() + timedelta(
+        days=int(days if days else 0),
+        hours=int(hours if hours else 0),
+        minutes=int(minutes if minutes else 0),
+    )
+    return date
+
+def convert_date_to_readable_form(date: datetime) -> str:
+    return datetime.strftime(date, "%d %B, %I:%M %p")
 
 def set_up_gdrive_api():
     creds = None

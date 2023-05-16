@@ -1,12 +1,13 @@
 from typing import List
-import discord
 from discord.ext import commands
 from datetime import datetime, timedelta
 from pymongo import MongoClient
 from pymongo.cursor import Cursor
 from pymongo.database import Database as MongoDatabase
+from utils import parse_date_string, convert_date_to_readable_form
 import sqlite3
 import re
+import discord
 import calendar
 
 
@@ -31,6 +32,13 @@ class Database:
         return c
 
     @staticmethod
+    def _get_all_reminders() -> List:
+        db = Database.create_connection()
+        reminders_col = db.reminders
+        c = reminders_col.find()
+        return c
+
+    @staticmethod
     def listen_for_due_reminders():
         """
         An asynchronous function that will check all reminders in the database for when one of them is due, 
@@ -39,7 +47,7 @@ class Database:
         THIS FUNCTION IS INCOMPLETE AS OF YET!
         """
         # TODO: Finish this.
-        rows = Database.get_all_reminders()
+        rows = Database._get_all_reminders()
         for row in rows:
             user = row[1]
             reminder = row[2]
@@ -81,15 +89,6 @@ class Database:
         return result.acknowledged
 
 
-class Utilities:
-    "Contains a bunch of helper functions for the reminders.py file."
-
-    @staticmethod
-    def convert_date_to_readable_form(date):
-        formatted_date = datetime.strftime(date, "%d %B, %I:%M %p")
-        return formatted_date
-
-
 class RemindersCog(commands.Cog, name="Reminders"):
     def __init__(self, bot) -> None:
         self.bot = bot
@@ -105,31 +104,7 @@ class RemindersCog(commands.Cog, name="Reminders"):
         """
 
         try:
-            # Read the "time" argument to figure out how many days, hours, and minutes until we remind the user.
-            days, hours, minutes = None, None, None
-            if "d" in time:
-                pattern = "\d+d"
-                match = re.search(pattern, time)
-                days = str(match.group()).replace("d", "")
-
-            if "h" in time:
-                print(time)
-                pattern = "\d+h"
-                match = re.search(pattern, time, flags=re.IGNORECASE)
-                hours = str(match.group()).replace("h", "")
-
-            if "m" in time:
-                pattern = "\d+m"
-                match = re.search(pattern, time)
-                minutes = str(match.group()).replace("m", "")
-
-            # There is a possibility that the user does not enter a day or an hour or a minute. We check for that possiblity here using ternary operators.
-            reminder_date = datetime.today() + timedelta(
-                days=int(days if days else 0),
-                hours=int(hours if hours else 0),
-                minutes=int(minutes if minutes else 0),
-            )
-
+            reminder_date = parse_date_string(time)
         except Exception as e:
             await ctx.send(
                 embed=discord.Embed(
@@ -138,7 +113,7 @@ class RemindersCog(commands.Cog, name="Reminders"):
             )
 
         # We convert the reminder_date into a more readable form, which will be given to the user.
-        reminder_date_in_readable_form = Utilities.convert_date_to_readable_form(
+        reminder_date_in_readable_form = convert_date_to_readable_form(
             reminder_date
         )
 
@@ -171,7 +146,7 @@ class RemindersCog(commands.Cog, name="Reminders"):
 
         if rows:
             for row in rows:
-                date_str = Utilities.convert_date_to_readable_form(row['time'])
+                date_str = convert_date_to_readable_form(row['time'])
                 items.append(f"{row['reminder'].capitalize()} due at **{date_str}**")
             embed = discord.Embed(
                 description=f"**Reminders for {ctx.message.author.mention}**\n\n"
@@ -195,7 +170,7 @@ class RemindersCog(commands.Cog, name="Reminders"):
 
     @staticmethod
     async def check_for_due_reminders():
-        rows = Database.get_all_reminders()
+        rows = Database._get_all_reminders()
         due_reminders = []
         if rows:
             for row in rows:

@@ -1,23 +1,19 @@
-# Snuggly -Discord Bot
+# Snuggly - Discord Bot
 Snuggly is a discord bot I created with discord.py. To add this bot to your own server, please click [HERE](https://discord.com/api/oauth2/authorize?client_id=832217886880825364&permissions=0&scope=bot) to invite it.
 
 ## Command Prefix
 The command prefix is a period/dot. ( . )
 
 ## Features
-Under construction. READMEs are so boring to write... :)
+- Note taking
+- Polls
+- 8ball
+- Reminders
+- Server administration (kicks, bans, etc.)
+- Bulk copy/remove stuff (I have no idea what else to call it...)
 
-## Main Tasks
-- [ ] Refactor and improve existing codebase
-- [x] Shift all data storage to MongoDB + ensure that each user's data is stored separately.
-- [ ] Use this bot project to also learn MongoDB deeply: https://roadmap.sh/mongodb
-- [ ] Implement logging for all commands and bot operations
-- [ ] Trading/Chart Analysis commands (mostly crypto stuff)
-    - [ ] Get prices of a given coin.
-    - [ ] Display an image of the chart of the coin, user can select timeframe too.
-- [ ] Twitter integration
-    - [ ] Post updates from selected accounts. You can integrate this with trading features as well.
-- [ ] Music and VC features
-- [ ] Random caller feature - You "call", someone else "calls", bot puts you both on the line and you can talk to each other.
-- [ ] AI stuff (vague ik, not sure what to add yet, but I wanna dive into AI so, yeah.)
+Just run the help command ( .help ) to get more information on any of these.
+![](./help-cmd.png)
 
+## Why
+I mainly built this bot as a practice project to learn discord.py. I may add more weird features in the future, just for learning purposes. 

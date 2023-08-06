@@ -27,8 +27,6 @@ client = commands.Bot(command_prefix=".", intents=intents)
 load_dotenv()
 token = os.environ.get('TOKEN')
 
-# TODO: Configure a Volume in the Dockerfile so you can store the DB files outside the container. This is for local DBs of course. It'll help you learn Docker Volumes.
-# TODO: Set up a MongoDB DB and set up a docker-compose.yml file and configure all necessary services.
 
 @client.event
 async def on_ready():

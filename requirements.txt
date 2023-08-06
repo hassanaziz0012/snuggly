@@ -11,3 +11,4 @@ googleapis-common-protos==1.59.0
 python-dotenv==0.16.0
 pymongo==4.3.3
 psycopg2==2.9.6
+emoji==2.7.0

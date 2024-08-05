@@ -18,5 +18,8 @@ Just run the help command ( .help ) to get more information on any of these.
 ## Why
 I mainly built this bot as a practice project to learn discord.py. I may add more weird features in the future, just for learning purposes. 
 
-## About me
-I'm a freelance developer. Wanna see more of my work? See my website here: https://www.hassandev.me
+## Author
+- Hassan Aziz
+- Web Developer and Designer
+- Website: https://www.hassandev.me
+- Check out my other [web projects](https://www.hassandev.me/projects)
